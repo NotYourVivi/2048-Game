@@ -6,25 +6,35 @@ pygame.init()
 
 FPS = 60
 
+# Game window dimensions and grid setup
 WIDTH, HEIGHT = 800, 800
 ROWS = 4
 COLS = 4
 
+
+#Tile dimensions
 RECT_HEIGHT = HEIGHT // ROWS
 RECT_WIDTH = WIDTH // COLS
+
 
 OUTLINE_COLOR = (187, 173, 160)
 OUTLINE_THICKNESS = 10
 
+
 BACKGROUND_COLOR = (205, 192, 180)
 FONT_COLOR = (119, 110, 101)
+
 
 FONT = pygame.font.SysFont("comicsans", 100, bold=True)
 MOVE_VELOCITY = 20
 
+
+# Display setup
 WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("2048")
 
+
+#Tile Setup
 class Tile:
     # All the tile colors (From 2 - 2048)
     COLORS = [
@@ -39,7 +49,7 @@ class Tile:
         (236, 202, 80)
     ]
 
-
+    
     def __init__(self, value, row, col):
         self.value = value
         self.row = row
@@ -48,6 +58,7 @@ class Tile:
         self.y = row * RECT_HEIGHT
     
 
+    #Chooses color based on tile value
     def get_color(self):
         color_index = int(math.log2(self.value)) - 1
         color = self.COLORS[color_index]
@@ -59,6 +70,8 @@ class Tile:
         pygame.draw.rect(window, color, (self.x, self.y, RECT_WIDTH, RECT_HEIGHT))
 
         text = FONT.render(str(self.value), 1, FONT_COLOR)
+
+        #Move the text to the center of the tile
         window.blit(
             text,
             (
@@ -68,6 +81,7 @@ class Tile:
         )
     
 
+    # Prevents incorrect snapping when moving tiles
     def set_pos(self, ceil = False):
         if ceil:
             self.row = math.ceil(self.y / RECT_HEIGHT)
@@ -77,11 +91,13 @@ class Tile:
             self.col = math.floor(self.x / RECT_WIDTH)
 
 
+    # Moves the tile   
     def move(self, delta):
         self.x += delta[0]
         self.y += delta[1]
 
 
+# Draw grid lines
 def draw_grid(window):
     for row in range(1, ROWS):
         y = row * RECT_HEIGHT
@@ -94,6 +110,7 @@ def draw_grid(window):
     pygame.draw.rect(window, OUTLINE_COLOR, (0, 0, WIDTH, HEIGHT), OUTLINE_THICKNESS)
 
 
+# Draw all tiles and the grid
 def draw(window, tiles):
     window.fill(BACKGROUND_COLOR)
 
@@ -126,7 +143,7 @@ def move_tiles(window, tiles, clock, direction):
         reverse = False
         delta = (-MOVE_VELOCITY, 0)
         boundary_check = lambda tile : tile.col == 0
-        gen_next_tile = lambda tile: tiles.get(f"{tile.row}{tile.col - 1}")
+        get_next_tile = lambda tile: tiles.get(f"{tile.row}{tile.col - 1}")
         merge_check = lambda tile, next_tile: tile.x > next_tile.x + MOVE_VELOCITY
         move_check = lambda tile, next_tile: tile.x > next_tile.x + RECT_WIDTH + MOVE_VELOCITY
         ceil = True
@@ -137,7 +154,7 @@ def move_tiles(window, tiles, clock, direction):
         reverse = True
         delta = (MOVE_VELOCITY, 0)
         boundary_check = lambda tile : tile.col == COLS - 1
-        gen_next_tile = lambda tile: tiles.get(f"{tile.row}{tile.col + 1}")
+        get_next_tile = lambda tile: tiles.get(f"{tile.row}{tile.col + 1}")
         merge_check = lambda tile, next_tile: tile.x < next_tile.x - MOVE_VELOCITY
         move_check = lambda tile, next_tile: tile.x + RECT_WIDTH + MOVE_VELOCITY < next_tile.x
         ceil = False
@@ -148,7 +165,7 @@ def move_tiles(window, tiles, clock, direction):
         reverse = False
         delta = (0, -MOVE_VELOCITY)
         boundary_check = lambda tile : tile.row == 0
-        gen_next_tile = lambda tile: tiles.get(f"{tile.row - 1}{tile.col}")
+        get_next_tile = lambda tile: tiles.get(f"{tile.row - 1}{tile.col}")
         merge_check = lambda tile, next_tile: tile.y > next_tile.y + MOVE_VELOCITY
         move_check = lambda tile, next_tile: tile.y > next_tile.y + RECT_HEIGHT + MOVE_VELOCITY
         ceil = True
@@ -159,7 +176,7 @@ def move_tiles(window, tiles, clock, direction):
         reverse = True
         delta = (0, MOVE_VELOCITY)
         boundary_check = lambda tile : tile.row == ROWS - 1
-        gen_next_tile = lambda tile: tiles.get(f"{tile.row + 1}{tile.col}")
+        get_next_tile = lambda tile: tiles.get(f"{tile.row + 1}{tile.col}")
         merge_check = lambda tile, next_tile: tile.y < next_tile.y - MOVE_VELOCITY
         move_check = lambda tile, next_tile: tile.y + RECT_HEIGHT + MOVE_VELOCITY < next_tile.y
         ceil = False
@@ -173,7 +190,7 @@ def move_tiles(window, tiles, clock, direction):
             if boundary_check(tile):
                 continue
 
-            next_tile = gen_next_tile(tile)
+            next_tile = get_next_tile(tile)
             if not next_tile:
                 tile.move(delta)
             elif tile.value == next_tile.value and tile not in blocks and next_tile not in blocks:
