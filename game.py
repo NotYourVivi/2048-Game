@@ -64,7 +64,7 @@ class Tile:
         color = self.COLORS[color_index]
         return color
 
-
+    # Draws the tile
     def draw(self, window):
         color = self.get_color()
         pygame.draw.rect(window, color, (self.x, self.y, RECT_WIDTH, RECT_HEIGHT))
@@ -120,7 +120,7 @@ def draw(window, tiles):
     draw_grid(window)
     pygame.display.update()
 
-
+#Get a random position for a new tile
 def get_random_pos(tiles):
     row = None
     col = None
@@ -133,7 +133,7 @@ def get_random_pos(tiles):
 
     return row, col
 
-
+# Move tiles in the specified direction
 def move_tiles(window, tiles, clock, direction):
     updated = True
     blocks = set()
